@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <file url="file://$PROJECT_DIR$" libraries="{Modularity node_modules}" />
+    <file url="file://$PROJECT_DIR$/Community.js" libraries="{ECMAScript 6}" />
+    <file url="file://$PROJECT_DIR$/CommunityStructure.js" libraries="{ECMAScript 6}" />
+    <file url="PROJECT" libraries="{Node.js v0.10.30 Core Modules}" />
+    <includedPredefinedLibrary name="Node.js Globals" />
+  </component>
+</project>

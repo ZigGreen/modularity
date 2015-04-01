@@ -1,0 +1,22 @@
+{
+  "name": "Modularity",
+  "version": "1.0.0",
+  "description": "modularity gephi js adoptation",
+  "main": "Modularity.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sna",
+    "graph",
+    "community",
+    "detection",
+    "network",
+    "algorithm"
+  ],
+  "author": "Zig Green <krisstal.mail@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ngraph.centrality": "^0.1.2"
+  }
+}
