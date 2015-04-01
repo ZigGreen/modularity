@@ -24,7 +24,7 @@ console.dir(communities);
 With [npm](https://npmjs.org):
 
 ```
-npm install modularity --save
+npm install ngraph.modularity --save
 ```
 
 # license

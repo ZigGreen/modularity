@@ -1,5 +1,5 @@
 {
-  "name": "modularity",
+  "name": "ngraph.modularity",
   "version": "1.0.0",
   "description": "modularity gephi js adoptation",
   "main": "Modularity.js",
