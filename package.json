@@ -18,5 +18,17 @@
   "license": "MIT",
   "dependencies": {
     "ngraph.centrality": "^0.1.2"
-  }
+  },
+  "directories": {
+    "example": "example"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZigGreen/modularity.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ZigGreen/modularity/issues"
+  },
+  "homepage": "https://github.com/ZigGreen/modularity"
 }
