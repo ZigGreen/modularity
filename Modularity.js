@@ -46,10 +46,10 @@ var CommunityStructure = require('./CommunityStructure')
 /**
  * @constructor
  */
-function Modularity () {
+function Modularity (resolution, useWeight) {
     this.isRandomized = false;
-    this.useWeight = false;
-    this.resolution = 1.;
+    this.useWeight = useWeight;
+    this.resolution = resolution || 1.;
     /**
      * @type {CommunityStructure}
      */
@@ -62,7 +62,7 @@ function Modularity () {
 Modularity.prototype.execute = function (graph/*, AttributeModel attributeModel*/) {
 
 
-    this.structure = new CommunityStructure(graph);
+    this.structure = new CommunityStructure(graph, this.useWeight);
 
     var comStructure = new Array(graph.getNodesCount());
 
@@ -75,12 +75,9 @@ Modularity.prototype.execute = function (graph/*, AttributeModel attributeModel*
         , this.useWeight
     );
 
-    this.modularity = computedModularityMetrics["modularity"];
-    this.modularityResolution = computedModularityMetrics["modularityResolution"];
-
     var result = {};
     this.structure.map.forEach(function (i, node) {
-        result[node.id] = comStructure[i];
+        result[node] = comStructure[i];
     });
 
     return result;
@@ -100,9 +97,7 @@ Modularity.prototype.execute = function (graph/*, AttributeModel attributeModel*
  */
 Modularity.prototype.computeModularity = function(graph, theStructure, comStructure,  currentResolution, randomized, weighted) {
 
-    //Progress.start(progress);
 
-    //var /*Random*/ rand = new Random();
     function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
     }
@@ -147,13 +142,18 @@ Modularity.prototype.computeModularity = function(graph, theStructure, comStruct
     }
 
     this.fillComStructure(graph, theStructure, comStructure);
+
+    /*
+    //TODO: uncomment when finalQ will be implemented
     var degreeCount = this.fillDegreeCount(graph, theStructure, comStructure, nodeDegrees, weighted);
 
-    var computedModularity = this.finalQ(comStructure, degreeCount, graph, theStructure, totalWeight, 1., weighted);
-    var computedModularityResolution = this.finalQ(comStructure, degreeCount, graph, theStructure, totalWeight, currentResolution, weighted);
+
+    var computedModularity = this._finalQ(comStructure, degreeCount, graph, theStructure, totalWeight, 1., weighted);
+    var computedModularityResolution = this._finalQ(comStructure, degreeCount, graph, theStructure, totalWeight, currentResolution, weighted);
 
     results["modularity"] =  computedModularity;
     results["modularityResolution"] =  computedModularityResolution;
+    */
 
     return results;
 };
@@ -166,8 +166,8 @@ Modularity.prototype.computeModularity = function(graph, theStructure, comStruct
  * @returns {Community}
  */
 Modularity.prototype.updateBestCommunity = function(theStructure,  i, currentResolution) {
-    var best = 0.;
-    var bestCommunity = null;
+    var best = this.q(i, theStructure.nodeCommunities[i], theStructure, currentResolution);
+    var bestCommunity = theStructure.nodeCommunities[i];
     //var /*Set<Community>*/ iter = theStructure.nodeConnectionsWeight[i].keySet();
     theStructure.nodeConnectionsWeight[i].forEach(function (_$$val, com) {
 
@@ -249,8 +249,10 @@ Modularity.prototype.fillDegreeCount = function(graph, theStructure, comStructur
  * @param {Boolean} weighted
  * @returns {Number}
  */
-Modularity.prototype.finalQ = function(struct, degrees, graph, theStructure, totalWeight, usedResolution, weighted) {
+Modularity.prototype._finalQ = function(struct, degrees, graph, theStructure, totalWeight, usedResolution, weighted) {
 
+    //TODO: rewrite for wighted version of algorithm
+    throw new Error("not implemented properly");
     var  res = 0;
     var  internal = new Array(degrees.length);
 
@@ -264,13 +266,13 @@ Modularity.prototype.finalQ = function(struct, degrees, graph, theStructure, tot
             var neigh_index = theStructure.map.get(neighbor);
             if (struct[neigh_index] == struct[n_index]) {
                 if (weighted) {
-                    throw new Error("weighted aren't implemented");
+                    //throw new Error("weighted aren't implemented");
                     //internal[struct[neigh_index]] += graph.getEdge(n, neighbor).getWeight();
                 } else {
                     internal[struct[neigh_index]]++;
                 }
             }
-        }.bind(this));
+        }.bind(this), false);
 
     }.bind(this));
 
@@ -281,19 +283,6 @@ Modularity.prototype.finalQ = function(struct, degrees, graph, theStructure, tot
     return res;
 };
 
-
-/*private void*/
-/*Modularity.prototype.saveValues = function(/!*int[]*!/ struct, /!*Graph*!/ graph, /!*AttributeModel*!/ attributeModel, /!*CommunityStructure*!/ theStructure) {
-    var /!*Table*!/ nodeTable = attributeModel.getNodeTable();
-    var /!*Column*!/ modCol = nodeTable.getColumn(MODULARITY_CLASS);
-    if (modCol == null) {
-        modCol = nodeTable.addColumn(MODULARITY_CLASS, "Modularity Class", Integer.class, new Integer(0));
-    }
-    for (Node n : graph.getNodes()) {
-        int n_index = theStructure.map.get(n);;
-        n.setAttribute(modCol, struct[n_index]);
-    }
-};*/
 
 
 /**

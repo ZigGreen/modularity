@@ -3,8 +3,37 @@ var dot = require('ngraph.fromdot')
     , centrality = require('ngraph.centrality')
     ;
 
-var g  = dot('digraph G { a -> b; b -> c; c -> a; a -> d; d -> e; e -> f; f -> d; f -> g; g -> e; }');
-var modularity = new Modularity;
+global.toArray = function(map) {
+    var result = [];
+    map.forEach(function (v, i) {
+        result.push([i,v]);
+    });
+    return result;
+};
+var g  = dot('digraph G {  }');
+g.addLink('a','b', {weight:1});
+g.addLink('b','c', {weight:1});
+g.addLink('c','a', {weight:1});
+g.addLink('c','k', {weight:10});
+g.addLink('k','d', {weight:10});
+g.addLink('d','e', {weight:1});
+g.addLink('e','f', {weight:1});
+g.addLink('f','d', {weight:1});
+
+/*g.forEachLink(function (link) {
+    console.dir(link);
+});
+
+g.forEachNode(function(n){
+    var log = n.id;
+
+    g.forEachLinkedNode(n.id, function(neighbor){
+        log += '\n\t' + neighbor.id;
+    }, true);
+    console.log(log);
+});*/
+
+var modularity = new Modularity(1,true);
 
 var communities = modularity.execute(g);
 

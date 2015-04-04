@@ -1,6 +1,6 @@
 "use strict";
 var Community = require('./Community')
-    , ModEdge= require('./ModEdge')
+    , ModEdge = require('./ModEdge')
     ;
 
 /**
@@ -34,18 +34,19 @@ function CommunityStructure(graph, useWeight) {
 
     /** @type {Array.< Array.<ModEdge> >} */
     this.topology = new Array(this.N);
+    for (var i = 0; i < this.N; i++) this.topology[i] = [];
 
     /** @type {Array.<Community>} */
-    this.communities =  [];
+    this.communities = [];
 
     /**@type {Array.<Number>} */
     this.weights = new Array(this.N);
 
     var index = 0;
 
-    graph.forEachNode(function(node){
+    graph.forEachNode(function (node) {
 
-        this.map.set(node, index);
+        this.map.set(node.id, index);
         this.nodeCommunities[index] = new Community(this);
         this.nodeConnectionsWeight[index] = new Map();
         this.nodeConnectionsCount[index] = new Map();
@@ -59,48 +60,56 @@ function CommunityStructure(graph, useWeight) {
 
     }.bind(this));
 
-    graph.forEachNode(function(node){
-        var node_index = this.map.get(node);
-        this.topology[node_index] = [];
 
-        graph.forEachLinkedNode(node.id, function(neighbor){
-            if (node == neighbor) {
-                return;
-            }
-            var neighbor_index = this.map.get(neighbor);
-            var weight = 1;
+    graph.forEachLink(function (link) {
 
-            if (useWeight) {
-                throw new Error("useWeight aren't implemented");
-                //weight =  graph.getEdge(node, neighbor).getWeight();
-            }
+        var node_index = this.map.get(link.fromId)
+            , neighbor_index = this.map.get(link.toId)
+            , weight = 1
+            ;
 
-            this.weights[node_index] += weight;
-            var /** @type {ModEdge} */ me = new ModEdge(node_index, neighbor_index, weight);
-            this.topology[node_index].push(me);
-            var /** @type {Community} **/ adjCom = this.nodeCommunities[neighbor_index];
-            this.nodeConnectionsWeight[node_index].set(adjCom, weight);
-            this.nodeConnectionsCount[node_index].set(adjCom, 1);
-            this.nodeCommunities[node_index].connectionsWeight.set(adjCom, weight);
-            this.nodeCommunities[node_index].connectionsCount.set(adjCom, 1);
-            this.nodeConnectionsWeight[neighbor_index].set(this.nodeCommunities[node_index], weight);
-            this.nodeConnectionsCount[neighbor_index].set(this.nodeCommunities[node_index], 1);
-            this.nodeCommunities[neighbor_index].connectionsWeight.set(this.nodeCommunities[node_index], weight);
-            this.nodeCommunities[neighbor_index].connectionsCount.set(this.nodeCommunities[node_index], 1);
-            this.graphWeightSum += weight;
-        }.bind(this));
+        if (node_index === neighbor_index) {
+            return;
+        }
+
+        if (useWeight) {
+            weight = link.data.weight;
+        }
+
+        this.setUpLink(node_index, neighbor_index, weight);
+        this.setUpLink(neighbor_index, node_index, weight);
+
 
     }.bind(this));
+
 
     this.graphWeightSum /= 2.0;
 }
 
 
+CommunityStructure.prototype.setUpLink = function (node_index, neighbor_index, weight) {
+
+    this.weights[node_index] += weight;
+    var /** @type {ModEdge} */ me = new ModEdge(node_index, neighbor_index, weight);
+    this.topology[node_index].push(me);
+    var /** @type {Community} **/ adjCom = this.nodeCommunities[neighbor_index];
+    this.nodeConnectionsWeight[node_index].set(adjCom, weight);
+    this.nodeConnectionsCount[node_index].set(adjCom, 1);
+    this.nodeCommunities[node_index].connectionsWeight.set(adjCom, weight);
+    this.nodeCommunities[node_index].connectionsCount.set(adjCom, 1);
+    this.nodeConnectionsWeight[neighbor_index].set(this.nodeCommunities[node_index], weight);
+    this.nodeConnectionsCount[neighbor_index].set(this.nodeCommunities[node_index], 1);
+    this.nodeCommunities[neighbor_index].connectionsWeight.set(this.nodeCommunities[node_index], weight);
+    this.nodeCommunities[neighbor_index].connectionsCount.set(this.nodeCommunities[node_index], 1);
+    this.graphWeightSum += weight;
+
+};
+
 /**
  * @param {Number} node
  * @param {Community} to
  */
-CommunityStructure.prototype.addNodeTo = function(node, to) {
+CommunityStructure.prototype.addNodeTo = function (node, to) {
 
     to.add(node);
     this.nodeCommunities[node] = to;
@@ -182,7 +191,7 @@ CommunityStructure.prototype.addNodeTo = function(node, to) {
  * @param {Number} node
  * @param {Community} source
  */
-CommunityStructure.prototype.removeNodeFrom = function(node, source) {
+CommunityStructure.prototype.removeNodeFrom = function (node, source) {
 
     var community = this.nodeCommunities[node];
 
@@ -259,7 +268,7 @@ CommunityStructure.prototype.removeNodeFrom = function(node, source) {
  * @param {Number} node
  * @param {Community} to
  */
-CommunityStructure.prototype.moveNodeTo = function(node, to) {
+CommunityStructure.prototype.moveNodeTo = function (node, to) {
 
     var source = this.nodeCommunities[node];
     this.removeNodeFrom(node, source);
@@ -268,9 +277,8 @@ CommunityStructure.prototype.moveNodeTo = function(node, to) {
 };
 
 
-
-CommunityStructure.prototype.zoomOut = function() {
-    var realCommunities = this.communities.reduce(function(arr, value) {
+CommunityStructure.prototype.zoomOut = function () {
+    var realCommunities = this.communities.reduce(function (arr, value) {
         arr.push(value);
         return arr;
     }, []);
@@ -283,9 +291,9 @@ CommunityStructure.prototype.zoomOut = function() {
     this.nodeConnectionsCount = new Array(M);
 
     var /** @type Map.<Number, Community>*/ newInvMap = new Map();
-    realCommunities.forEach(function(com) {
+    realCommunities.forEach(function (com) {
 
-        var  weightSum = 0;
+        var weightSum = 0;
         this.nodeConnectionsWeight[index] = new Map();
         this.nodeConnectionsCount[index] = new Map();
         newTopology[index] = [];
@@ -302,9 +310,10 @@ CommunityStructure.prototype.zoomOut = function() {
         }, this);
 
         newInvMap.set(index, hidden);
-        com.connectionsWeight.forEach( function(weight, adjCom ) {
+        com.connectionsWeight.forEach(function (weight, adjCom) {
 
             var target = realCommunities.indexOf(adjCom);
+            if (!~target) return;
             if (target == index) {
                 weightSum += 2. * weight;
             } else {
@@ -345,20 +354,3 @@ CommunityStructure.prototype.zoomOut = function() {
 };
 
 module.exports = CommunityStructure;
-
-/*class CommunityStructure {
-
-    HashMap<Modularity.Community, Float>[] nodeConnectionsWeight;
-    HashMap<Modularity.Community, Integer>[] nodeConnectionsCount;
-    HashMap<Node, Integer> map;
-    Community[] nodeCommunities;
-    Graph graph;
-    double[] weights;
-    double graphWeightSum;
-    LinkedList<ModEdge>[] topology;
-    LinkedList<Community> communities;
-    int N;
-    HashMap<Integer, Community> invMap;
-
-
-}*/
