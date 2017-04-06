@@ -20,19 +20,6 @@ g.addLink('d','e', {weight:1});
 g.addLink('e','f', {weight:1});
 g.addLink('f','d', {weight:1});
 
-/*g.forEachLink(function (link) {
-    console.dir(link);
-});
-
-g.forEachNode(function(n){
-    var log = n.id;
-
-    g.forEachLinkedNode(n.id, function(neighbor){
-        log += '\n\t' + neighbor.id;
-    }, true);
-    console.log(log);
-});*/
-
 var modularity = new Modularity(1,true);
 
 var communities = modularity.execute(g);
